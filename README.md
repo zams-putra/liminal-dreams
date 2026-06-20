@@ -23,6 +23,10 @@ merupakan mimpi yg ku tunggu tunggu, dimana cuaca mendung gelap dan suasana suny
 - https://sketchfab.com/3dmish
 - https://sketchfab.com/3d-models/wooden-bench-dd5f87e5b8644111b8180515eed4c54e
 
+## PC Gaming 3D Models 
+- https://sketchfab.com/Yolala3d
+- https://sketchfab.com/3d-models/gaming-desktop-pc-d1d8282c9916438091f11aeb28787b66
+
 
 ## Backsound
 - https://soundcloud.com/xqudey2/you-dont-exist-slowed-this
