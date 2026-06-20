@@ -11,6 +11,8 @@ const lampGLTF = await loader.loadAsync('models/lamp/scene.gltf');
 const baseLamp = lampGLTF.scene; 
 const catGLTF = await loader.loadAsync('models/cat/scene.gltf');
 const baseCat = catGLTF.scene; 
+const benchGLTF = await loader.loadAsync('models/bench/scene.gltf');
+const baseBench = benchGLTF.scene; 
 
 
 
@@ -73,6 +75,9 @@ light.position.set(5, 10, 5);
 scene.add(light);
 
 
+
+
+
 // mode garis2 ngedesign tanah
 // const grid = new THREE.GridHelper(50, 50, 0x555566, 0x404048);
 // scene.add(grid);
@@ -89,6 +94,12 @@ for (let i = 0; i < 8; i++) {
     tree.scale.set(0.07, 0.07, 0.07)
     scene.add(tree);
     obstacles.push(tree); 
+    const bench = baseBench.clone(); 
+    bench.position.set((Math.random() - 0.5) * 30, 0, (Math.random() - 0.5) * 30);
+    bench.scale.set(0.01, 0.01, 0.01)
+    bench.rotation.y = -(Math.PI / 2)
+    scene.add(bench);
+    obstacles.push(bench); 
     
 }
 
@@ -215,7 +226,7 @@ addEventListener('keyup', (e) => {
 
 
 const playerRadius = 0.6;
-const obstacleRadius = 0.7;
+const obstacleRadius = 0.07;
 
 function isCollidingWithObstacles(position) {
   for (const obstacle of obstacles) {
@@ -230,8 +241,30 @@ function isCollidingWithObstacles(position) {
 const clock = new THREE.Clock();
 
 
+// partikel
+const particleCount = 500;
+const particleGeometry = new THREE.BufferGeometry();
+const particleMaterial = new THREE.PointsMaterial({
+    color: 0x8fa8c8,
+    size: 0.05,
+    transparent: true,
+    opacity: 0.4
+});
+
+const particlePositions = new Float32Array(particleCount * 3);
+for(let i = 0; i < particleCount * 3; i++) {
+    particlePositions[i] = (Math.random() - 0.5) * 50;
+}
+particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+const dustParticles = new THREE.Points(particleGeometry, particleMaterial);
+scene.add(dustParticles);
 
 
+dustParticles.rotation.y += 0.0005;
+dustParticles.position.y = Math.sin(clock.getElapsedTime() * 0.2) * 0.5;
+
+
+// joy stick n control
 const moveInput = new THREE.Vector3()
 
 const joystickBase = document.getElementById('joystick-base');
@@ -309,6 +342,10 @@ const chatboxName = document.getElementById('chatbox-name');
 const chatboxText = document.getElementById('chatbox-text');
 const chatboxImg = document.getElementById('chatbox-img');
 
+
+let targetCatRotationY = 0;
+targetCatRotationY = baseCat.rotation.y;
+
 function openChatbox(name, text, imageSrc) {
     chatboxName.innerText = name;
     chatboxText.innerText = text;
@@ -319,12 +356,18 @@ function openChatbox(name, text, imageSrc) {
 
 chatboxContainer.addEventListener('click', () => {
     chatboxContainer.style.display = 'none';
+
+    targetCatRotationY = baseCat.userData.originalRotationY;
 });
 
 
 function handleInteraction(info) {
     switch (info.type) {
         case 'cat':
+           if (baseCat.userData.originalRotationY === undefined) {
+                 baseCat.userData.originalRotationY = baseCat.rotation.y;
+            }
+            targetCatRotationY = baseCat.userData.originalRotationY + (Math.PI / 2);
             openChatbox(
                 info.name, 
                 'Saya akan lawan!', 
@@ -370,6 +413,10 @@ function showMessage(text) {
     }, 2000);
 }
 
+
+
+
+// animate
 function animate() {
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
@@ -404,6 +451,14 @@ function animate() {
     camera.position.copy(player.position).add(cameraOffset)
     camera.lookAt(player.position)
 
+    // kamera goyang jalan
+    let walkSpeed = moveInput.lengthSq(); 
+    if (walkSpeed > 0) {
+        camera.position.y += Math.sin(clock.getElapsedTime() * 8) * 0.05; 
+    }
+
+    // animate kucing muter pas di klik
+    baseCat.rotation.y = THREE.MathUtils.lerp(baseCat.rotation.y, targetCatRotationY, 0.1);
 
     
     composer.render();
