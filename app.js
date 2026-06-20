@@ -9,8 +9,10 @@ const treeGLTF = await loader.loadAsync('models/tree/scene.gltf');
 const baseTree = treeGLTF.scene; 
 const lampGLTF = await loader.loadAsync('models/lamp/scene.gltf');
 const baseLamp = lampGLTF.scene; 
-// const playerGLTF = await loader.loadAsync('models/player/scene.gltf');
-// const basePlayer = playerGLTF.scene; 
+const catGLTF = await loader.loadAsync('models/cat/scene.gltf');
+const baseCat = catGLTF.scene; 
+
+
 
 const textureLoader = new THREE.TextureLoader();
 const textureTanah = await textureLoader.loadAsync( 'texture/tanah.png' );
@@ -91,13 +93,25 @@ for (let i = 0; i < 8; i++) {
 }
 
 
+const catBox = new THREE.Box3().setFromObject(baseCat);
+const catSize = catBox.getSize(new THREE.Vector3());
+
+const targetCatHeight = 0.3;
+const catScale = targetCatHeight / catSize.y;
+
+baseCat.scale.setScalar(catScale * 5);
+
+const scaledMinY = catBox.min.y * catScale;
+
+baseCat.position.set(1, -scaledMinY, 0);
+scene.add(baseCat);
+
+
 
 const player = new THREE.Mesh(
     new THREE.BoxGeometry(1, 2, 1),
     new THREE.MeshStandardMaterial({ color: 0x555570})
 )
-// const player = basePlayer.clone(); 
-// console.log(player);
 player.position.set(0, 0.5, 0)
 scene.add(player)
 
@@ -216,7 +230,9 @@ function isCollidingWithObstacles(position) {
 const clock = new THREE.Clock();
 
 
-const moveDirection = new THREE.Vector3()
+
+
+const moveInput = new THREE.Vector3()
 
 const joystickBase = document.getElementById('joystick-base');
 const joystickKnob = document.getElementById('joystick-knob');
@@ -229,17 +245,16 @@ let startX = 0;
 let startZ = 0;
 
 window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse') return;
+    if (e.clientX > window.innerWidth / 2) return;
 
     joystickActive = true;
     joystickPointerId = e.pointerId;
-
-   
     joystickBase.style.left = (e.clientX - 45) + 'px';
     joystickBase.style.top = (e.clientY - 45) + 'px';
     joystickBase.style.opacity = '1';
-
     startX = e.clientX;
-    startZ = e.clientY; 
+    startZ = e.clientY;
 });
 
 window.addEventListener('pointermove', (e) => {
@@ -256,17 +271,104 @@ window.addEventListener('pointermove', (e) => {
     const knobY = Math.sin(angle) * clampedDistance;
 
     joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;   
-    moveDirection.x = knobX / maxRadius;
-    moveDirection.z = knobY / maxRadius;
+    moveInput.x = knobX / maxRadius;
+    moveInput.z = knobY / maxRadius;
 });
 
 window.addEventListener('pointerup', (e) => {
   if (e.pointerId !== joystickPointerId) return;
   joystickActive = false;
   joystickKnob.style.transform = 'translate(-50%, -50%)';
-  moveDirection.set(0, 0, 0);
+  moveInput.set(0, 0, 0);
   joystickBase.style.opacity = '0';
 });
+
+
+
+
+// raycaster
+baseCat.userData.interactable = { type: 'cat', name: 'Sidi' };
+const interactables = [baseCat];
+
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const maxInteractDistance = 3.5; 
+
+function findInteractableRoot(object) {
+    let current = object;
+    while (current) {
+        if (current.userData?.interactable) return current;
+        current = current.parent;
+    }
+    return null;
+}
+
+const chatboxContainer = document.getElementById('chatbox-container');
+const chatboxName = document.getElementById('chatbox-name');
+const chatboxText = document.getElementById('chatbox-text');
+const chatboxImg = document.getElementById('chatbox-img');
+
+function openChatbox(name, text, imageSrc) {
+    chatboxName.innerText = name;
+    chatboxText.innerText = text;
+    if (imageSrc) chatboxImg.src = imageSrc;
+    chatboxContainer.style.display = 'flex';
+}
+
+
+chatboxContainer.addEventListener('click', () => {
+    chatboxContainer.style.display = 'none';
+});
+
+
+function handleInteraction(info) {
+    switch (info.type) {
+        case 'cat':
+            openChatbox(
+                info.name, 
+                'Saya akan lawan!', 
+                'texture/cat1.jpg' 
+            );
+            break;
+    }
+}
+
+function tryInteract(clientX, clientY) {
+    pointer.x = (clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects(interactables, true);
+    if (hits.length === 0) return;
+
+    const root = findInteractableRoot(hits[0].object);
+    if (!root) return;
+
+    const distance = player.position.distanceTo(root.position);
+    if (distance > maxInteractDistance) {
+        showMessage('Terlalu jauh...');
+        return;
+    }
+
+    handleInteraction(root.userData.interactable);
+}
+
+renderer.domElement.addEventListener('click', (e) => {
+    tryInteract(e.clientX, e.clientY);
+});
+
+const interactMessage = document.getElementById('interact-message');
+let messageTimeout;
+
+function showMessage(text) {
+    clearTimeout(messageTimeout);
+    interactMessage.innerText = text;
+    interactMessage.style.opacity = '1';
+    messageTimeout = setTimeout(() => {
+        interactMessage.style.opacity = '0';
+    }, 2000);
+}
 
 function animate() {
     requestAnimationFrame(animate);
@@ -274,14 +376,13 @@ function animate() {
     const speed = 5;
 
     if (!joystickActive) {
-        moveDirection.x = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
-        moveDirection.z = (keys.bottom ? 1 : 0) - (keys.top ? 1 : 0)
-        if (moveDirection.lengthSq() > 0) moveDirection.normalize();
+        moveInput.x = (keys.right ? 1 : 0) - (keys.left ? 1 : 0)
+        moveInput.z = (keys.bottom ? 1 : 0) - (keys.top ? 1 : 0)
+        if (moveInput.lengthSq() > 0) moveInput.normalize();
     }
 
 
-    moveDirection.normalize()
-    moveDirection.multiplyScalar(speed * delta)
+    const moveDirection = moveInput.clone().multiplyScalar(speed * delta)
     
 
 

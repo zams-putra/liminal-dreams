@@ -77,6 +77,92 @@
             50% { opacity: 1; }
             100% { opacity: 0.3; }
         }
+        #interact-message {
+            position: fixed;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #e8e4d8;
+            font-family: monospace;
+            font-size: 1rem;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 16px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 6;
+            text-align: center;
+        }
+
+ 
+        
+        #chatbox-container {
+            position: fixed;
+            bottom: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 600px;
+            background: rgba(5, 6, 12, 0.9);
+            border: 2px solid #8fa8c8;
+            border-radius: 8px;
+            display: none;
+            padding: 15px;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        #chatbox-avatar {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+            flex-shrink: 0;
+            background: #1a2440; 
+            border: 1px solid #8fa8c8;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #chatbox-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #chatbox-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        #chatbox-name {
+            color: #ffaa55; 
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        #chatbox-text {
+            color: #e8e4d8;
+            font-family: monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #chatbox-hint {
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            color: #8fa8c8;
+            font-family: monospace;
+            font-size: 0.7rem;
+            animation: pulse 2s infinite;
+        }
      </style>
 </head>
 <body>
@@ -86,6 +172,19 @@
     <div id="joystick-base">
         <div id="joystick-knob"></div>
     </div>
+    <div id="interact-message"></div>
+
+    <div id="chatbox-container">
+        <div id="chatbox-avatar">
+            <img id="chatbox-img" src="texture/tanah.png" alt="Avatar">
+        </div>
+        <div id="chatbox-content">
+            <div id="chatbox-name">Char name</div>
+            <div id="chatbox-text">Dialog</div>
+            <div id="chatbox-hint">Close chat</div>
+        </div>
+    </div>
+
 
     <audio id="bg-music" src="music/ambient.mp3" loop></audio>
 
