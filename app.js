@@ -10,6 +10,12 @@ const baseTree = treeGLTF.scene;
 const lampGLTF = await loader.loadAsync('models/lamp/scene.gltf');
 const baseLamp = lampGLTF.scene; 
 
+const loadingScreen = document.getElementById('loading-screen');
+loadingScreen.style.opacity = '0';
+setTimeout(() => {
+    loadingScreen.remove();
+}, 1500);
+
 const scene = new THREE.Scene();
 // scene.fog = new THREE.Fog(0x8a93a0, 1, 28);
 // scene.fog = new THREE.Fog(0x8a93a0, 1, 100);
