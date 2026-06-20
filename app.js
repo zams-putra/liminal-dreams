@@ -9,12 +9,37 @@ const treeGLTF = await loader.loadAsync('models/tree/scene.gltf');
 const baseTree = treeGLTF.scene; 
 const lampGLTF = await loader.loadAsync('models/lamp/scene.gltf');
 const baseLamp = lampGLTF.scene; 
+// const playerGLTF = await loader.loadAsync('models/player/scene.gltf');
+// const basePlayer = playerGLTF.scene; 
 
+const textureLoader = new THREE.TextureLoader();
+const textureTanah = await textureLoader.loadAsync( 'texture/tanah.png' );
+textureTanah.wrapS = THREE.RepeatWrapping;
+textureTanah.wrapT = THREE.RepeatWrapping;
+textureTanah.repeat.set(10, 10); 
+textureTanah.minFilter = THREE.LinearFilter;
+textureTanah.magFilter = THREE.LinearFilter;
+
+// const loadingScreen = document.getElementById('loading-screen');
+// loadingScreen.style.opacity = '0';
+// setTimeout(() => {
+//     loadingScreen.remove();
+// }, 1500);
 const loadingScreen = document.getElementById('loading-screen');
-loadingScreen.style.opacity = '0';
-setTimeout(() => {
-    loadingScreen.remove();
-}, 1500);
+const loadingStatus = document.getElementById('loading-status');
+const startBtn = document.getElementById('start-btn');
+const bgMusic = document.getElementById('bg-music');
+loadingStatus.innerText = "Ready.";
+startBtn.style.display = "block";
+startBtn.addEventListener('click', () => {
+    bgMusic.volume = 1;
+    bgMusic.play().catch(error => console.log("Audio play blocked:", error));
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+        loadingScreen.remove();
+    }, 1500);
+});
+
 
 const scene = new THREE.Scene();
 // scene.fog = new THREE.Fog(0x8a93a0, 1, 28);
@@ -29,7 +54,8 @@ document.body.appendChild(renderer.domElement);
 
 const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x303030 })
+//   new THREE.MeshStandardMaterial({ color: 0x303030 })
+  new THREE.MeshStandardMaterial({ map: textureTanah })
 );
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
@@ -45,9 +71,9 @@ light.position.set(5, 10, 5);
 scene.add(light);
 
 
-
-const grid = new THREE.GridHelper(50, 50, 0x555566, 0x404048);
-scene.add(grid);
+// mode garis2 ngedesign tanah
+// const grid = new THREE.GridHelper(50, 50, 0x555566, 0x404048);
+// scene.add(grid);
 
 const obstacles = []; 
 
@@ -70,6 +96,8 @@ const player = new THREE.Mesh(
     new THREE.BoxGeometry(1, 2, 1),
     new THREE.MeshStandardMaterial({ color: 0x555570})
 )
+// const player = basePlayer.clone(); 
+// console.log(player);
 player.position.set(0, 0.5, 0)
 scene.add(player)
 
@@ -197,34 +225,39 @@ const maxRadius = 45;
 let joystickActive = false;
 let joystickPointerId = null;
 
-joystickBase.addEventListener('pointerdown', (e) => {
-  joystickActive = true;
-  joystickPointerId = e.pointerId;
-  joystickBase.setPointerCapture(e.pointerId); 
+let startX = 0;
+let startZ = 0;
 
-  joystickBase.style.opacity = '1';
+window.addEventListener('pointerdown', (e) => {
+
+    joystickActive = true;
+    joystickPointerId = e.pointerId;
+
+   
+    joystickBase.style.left = (e.clientX - 45) + 'px';
+    joystickBase.style.top = (e.clientY - 45) + 'px';
+    joystickBase.style.opacity = '1';
+
+    startX = e.clientX;
+    startZ = e.clientY; 
 });
 
 window.addEventListener('pointermove', (e) => {
     if (!joystickActive || e.pointerId !== joystickPointerId) return;
 
-    const rect = joystickBase.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startZ; 
 
-    const dx = e.clientX - centerX
-    const dz = e.clientY - centerY
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const clampedDistance = Math.min(distance, maxRadius);
 
+    const angle = Math.atan2(dy, dx);
+    const knobX = Math.cos(angle) * clampedDistance;
+    const knobY = Math.sin(angle) * clampedDistance;
 
-
-    const clampedX = THREE.MathUtils.clamp(dx, -maxRadius, maxRadius)
-    const clampedZ = THREE.MathUtils.clamp(dz, -maxRadius, maxRadius)
-    
-    joystickKnob.style.transform = `translate(calc(-50% + ${clampedX}px), calc(-50% + ${clampedZ}px))`
-
-
-    moveDirection.x = clampedX / maxRadius
-    moveDirection.z = clampedZ / maxRadius
+    joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;   
+    moveDirection.x = knobX / maxRadius;
+    moveDirection.z = knobY / maxRadius;
 });
 
 window.addEventListener('pointerup', (e) => {

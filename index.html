@@ -22,8 +22,6 @@
 
         #joystick-base {
             position: fixed;
-            bottom: 40px;
-            left: 40px;
             width: 90px; 
             height: 90px; 
             border-radius: 50%;
@@ -32,7 +30,8 @@
             touch-action: none;
             z-index: 5;
             opacity: 0;
-            transition: opacity 0.2s ease-in-out; 
+            transition: opacity 0.2s;
+
         }
 
         #joystick-knob {
@@ -88,8 +87,13 @@
         <div id="joystick-knob"></div>
     </div>
 
+    <audio id="bg-music" src="music/ambient.mp3" loop></audio>
+
     <div id="loading-screen">
-        <div class="loading-text">Loading...</div>
+        <div id="loading-content">
+            <div class="loading-text" id="loading-status">Loading...</div>
+            <button id="start-btn" style="display: none; margin-top: 20px; padding: 10px 20px; background: #8fa8c8; border: none; cursor: pointer; font-family: monospace;">Start</button>
+        </div>
     </div>
 
 
