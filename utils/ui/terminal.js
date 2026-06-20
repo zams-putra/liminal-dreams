@@ -3,6 +3,8 @@ import { state } from '../core/state.js';
 const terminalOverlay = document.getElementById('terminal-overlay');
 const terminalOutput = document.getElementById('terminal-output');
 const terminalInput = document.getElementById('terminal-input');
+const terminalClose = document.getElementById('terminal-close');
+const terminalSend = document.getElementById('terminal-send');
 
 const terminalFiles = {
     'note.txt': 'sunyi"',
@@ -10,7 +12,13 @@ const terminalFiles = {
 };
 
 const terminalCommands = {
-    help: () => 'commands: ls, cat [file], whoami, clear, exit',
+    help: () => `
+ls - list your files
+cat [file] - read file
+whoami - who i am
+clear - clear your terminal
+exit - exit terminal
+    `,
     ls: () => Object.keys(terminalFiles).join('  '),
     whoami: () => 'guest@dream — tidak ada akses root di sini.',
     clear: () => { terminalOutput.innerHTML = ''; return null; },
@@ -43,6 +51,13 @@ function runTerminalCommand(raw) {
     if (result) appendTerminalLine(result);
 }
 
+
+function submitInput() {
+    const value = terminalInput.value;
+    runTerminalCommand(value);
+    terminalInput.value = '';
+}
+
 export function openTerminal() {
     state.terminalOpen = true;
     terminalOverlay.style.display = 'flex';
@@ -59,11 +74,23 @@ function closeTerminal() {
     terminalInput.blur();
 }
 
+
 terminalInput.addEventListener('keydown', (e) => {
-    if (e.code === 'Enter') {
-        runTerminalCommand(terminalInput.value);
-        terminalInput.value = '';
+    if (e.key === 'Enter' || e.code === 'Enter' || e.keyCode === 13) {
+        e.preventDefault();
+        submitInput();
     } else if (e.code === 'Escape') {
         closeTerminal();
     }
 });
+
+
+terminalInput.addEventListener('input', (e) => {
+    if (e.inputType === 'insertLineBreak') {
+        submitInput();
+    }
+});
+
+terminalClose.addEventListener('click', closeTerminal);
+
+terminalSend.addEventListener('click', submitInput);

@@ -226,4 +226,31 @@
         font-family: monospace;
         font-size: 0.95rem;
     }
-        
+    
+    #terminal-close {
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1px solid #2a3550;
+    border-radius: 4px;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+#terminal-input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 8px;
+}
+
+#terminal-send {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid #2a3550;
+    color: #8fa8c8;
+    font-family: monospace;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
