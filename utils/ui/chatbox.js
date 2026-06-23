@@ -1,3 +1,5 @@
+import { returnToFollow } from "../core/cameraDirector.js";
+
 const chatboxContainer = document.getElementById('chatbox-container');
 const chatboxName = document.getElementById('chatbox-name');
 const chatboxText = document.getElementById('chatbox-text');
@@ -16,4 +18,5 @@ export function openChatbox(name, text, imageSrc, onClose) {
 chatboxContainer.addEventListener('click', () => {
     chatboxContainer.style.display = 'none';
     currentOnClose?.();
+    returnToFollow();
 });

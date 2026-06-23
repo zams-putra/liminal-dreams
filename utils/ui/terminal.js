@@ -1,3 +1,4 @@
+import { returnToFollow } from '../core/cameraDirector.js';
 import { state } from '../core/state.js';
 
 const terminalOverlay = document.getElementById('terminal-overlay');
@@ -60,7 +61,12 @@ function submitInput() {
 
 export function openTerminal() {
     state.terminalOpen = true;
-    terminalOverlay.style.display = 'flex';
+    setTimeout(() => {
+        // ini sesuai ama file ini cuy /core/cameraDirector di var ini: const transitionDuration = 0.9;
+        // fungsinya tuh biar doi ga langsung buka terminal jadi ada jeda animasinya gitu lah
+        terminalOverlay.style.display = 'flex';
+    }, 900)
+    
     terminalOutput.innerHTML = '';
     appendTerminalLine('connected...');
     appendTerminalLine("ketik 'help' untuk help.");
@@ -72,6 +78,7 @@ function closeTerminal() {
     state.terminalOpen = false;
     terminalOverlay.style.display = 'none';
     terminalInput.blur();
+    returnToFollow();
 }
 
 

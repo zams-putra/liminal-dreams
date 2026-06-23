@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { scene, camera } from '../core/sceneSetup.js';
 import { obstacles } from '../world/environment.js';
 import { state } from '../core/state.js';
+import { updateCamera } from '../core/cameraDirector.js';
 
 export const player = new THREE.Mesh(
     new THREE.BoxGeometry(1, 2, 1),
@@ -96,29 +97,35 @@ window.addEventListener('pointerup', (e) => {
     joystickBase.style.opacity = '0';
 });
 
+const naturalFollowPos = new THREE.Vector3();
+const naturalLookAt = new THREE.Vector3();
+
 export function updatePlayer(delta, elapsedTime) {
-    if (!joystickActive) {
-        moveInput.x = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-        moveInput.z = (keys.bottom ? 1 : 0) - (keys.top ? 1 : 0);
-        if (moveInput.lengthSq() > 0) moveInput.normalize();
+    if (!state.cameraFocused) {
+        if (!joystickActive) {
+            moveInput.x = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+            moveInput.z = (keys.bottom ? 1 : 0) - (keys.top ? 1 : 0);
+            if (moveInput.lengthSq() > 0) moveInput.normalize();
+        }
+
+        const speed = 5;
+        const moveDirection = moveInput.clone().multiplyScalar(speed * delta);
+        const candidatePosition = player.position.clone().add(moveDirection);
+
+        const boundLimit = 24;
+        candidatePosition.x = THREE.MathUtils.clamp(candidatePosition.x, -boundLimit, boundLimit);
+        candidatePosition.z = THREE.MathUtils.clamp(candidatePosition.z, -boundLimit, boundLimit);
+
+        if (!isCollidingWithObstacles(candidatePosition)) {
+            player.position.copy(candidatePosition);
+        }
     }
 
-    const speed = 5;
-    const moveDirection = moveInput.clone().multiplyScalar(speed * delta);
-    const candidatePosition = player.position.clone().add(moveDirection);
-
-    const boundLimit = 24;
-    candidatePosition.x = THREE.MathUtils.clamp(candidatePosition.x, -boundLimit, boundLimit);
-    candidatePosition.z = THREE.MathUtils.clamp(candidatePosition.z, -boundLimit, boundLimit);
-
-    if (!isCollidingWithObstacles(candidatePosition)) {
-        player.position.copy(candidatePosition);
+    naturalFollowPos.copy(player.position).add(cameraOffset);
+    if (!state.cameraFocused && moveInput.lengthSq() > 0) {
+        naturalFollowPos.y += Math.sin(elapsedTime * 8) * 0.05;
     }
+    naturalLookAt.copy(player.position);
 
-    camera.position.copy(player.position).add(cameraOffset);
-    camera.lookAt(player.position);
-
-    if (moveInput.lengthSq() > 0) {
-        camera.position.y += Math.sin(elapsedTime * 8) * 0.05;
-    }
+    updateCamera(delta, naturalFollowPos, naturalLookAt); 
 }

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { camera, renderer } from '../core/sceneSetup.js';
 import { player } from '../entities/player.js';
 import { state } from '../core/state.js';
+import { focusOnObject } from '../core/cameraDirector.js';
 
 export const interactables = [];
 export const maxInteractDistance = 3.5;
@@ -70,7 +71,9 @@ export function updateInteractTarget() {
 }
 
 function triggerInteraction(target) {
-    target?.userData?.interactable?.onInteract?.();
+    if (!target) return;
+    focusOnObject(target, target.userData.interactable.cameraOffset); 
+    target.userData.interactable.onInteract?.();
 }
 
 renderer.domElement.addEventListener('click', (e) => {
