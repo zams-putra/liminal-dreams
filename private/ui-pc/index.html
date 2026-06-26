@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>dreamOS</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+
+.pc-main{
+    position:fixed;
+    inset:0;
+}
+
+.wallpaper{
+    position:absolute;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.desktop-icons{
+    position:absolute;
+    top:30px;
+    left:30px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    z-index:5;
+}
+
+.desktop-app{
+    width:90px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    padding:10px;
+    border-radius:12px;
+    transition:.2s;
+}
+
+.desktop-app:hover{
+    background:rgba(255,255,255,.1);
+    backdrop-filter:blur(8px);
+}
+
+.desktop-app img{
+    width:56px;
+    height:56px;
+    object-fit:cover;
+    border-radius:12px;
+}
+
+.desktop-app span{
+    color:white;
+    text-shadow:0 0 10px black;
+    font-size:.8rem;
+}
+
+
+
+.taskbar{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:48px;
+
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(15px);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:0 20px;
+    color:white;
+    z-index:10;
+}
+
+.taskbar-left{
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.taskbar-right{
+    font-family:monospace;
+}
+
+
+#terminal-overlay{
+    position:fixed;
+    inset:0;
+
+    background:black;
+    color:#8fa8c8;
+
+    font-family:monospace;
+    z-index:100;
+
+    display:none;
+    flex-direction:column;
+
+    padding:20px;
+}
+
+#terminal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    border-bottom:1px solid #2a3550;
+    padding-bottom:10px;
+    margin-bottom:10px;
+}
+
+#terminal-close{
+    cursor:pointer;
+    border:1px solid #2a3550;
+    padding:6px 12px;
+    border-radius:5px;
+}
+
+#terminal-close:hover{
+    background:#1d2434;
+}
+
+#terminal-output{
+    flex:1;
+    overflow-y:auto;
+    white-space:pre-wrap;
+    line-height:1.5;
+}
+
+#terminal-input-line{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-top:10px;
+}
+
+#terminal-input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#8fa8c8;
+    font-family:monospace;
+    font-size:1rem;
+}
+
+#terminal-send{
+    background:#1d2434;
+    color:#8fa8c8;
+    border:1px solid #2a3550;
+    padding:8px 15px;
+    cursor:pointer;
+}
+
+#terminal-send:hover{ 
+    background:#2a3550;
+}
+
+
+
+.notes-overlay {
+    display: none;
+    width: 40%;
+    height: 40%;
+    border-radius: 2rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    background-color: #2a3550;
+    color: #8fa8c8;
+    position: relative;
+}
+
+.notes-close-btn {
+    position: absolute;
+    right: 1;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<div class="pc-main">
+
+    <img class="wallpaper" src="./img/wallpaper.png">
+
+    <div class="desktop-icons">
+
+        <div class="desktop-app" id="open-terminal">
+            <img src="./img/cat1.jpg">
+            <span>Terminal</span>
+        </div>
+
+        <div class="desktop-app" id="open-notes">
+            <img src="./img/cat1.jpg">
+            <span>Notes</span>
+        </div>
+
+        <div class="desktop-app">
+            <img src="./img/cat1.jpg">
+            <span>Files</span>
+        </div>
+
+    </div>
+
+    <div class="taskbar">
+        <div class="taskbar-left">
+            dreamOS
+        </div>
+
+        <div class="taskbar-right">
+            <span id="clock"></span>
+        </div>
+    </div>
+
+</div>
+
+<div id="terminal-overlay">
+
+    <div id="terminal-header">
+        <span>guest@dream</span>
+        <span id="terminal-close">[x] close</span>
+    </div>
+
+    <div id="terminal-output"></div>
+
+    <div id="terminal-input-line">
+        <span>&gt;</span>
+        <input id="terminal-input" type="text">
+        <button id="terminal-send">OK</button>
+    </div>
+
+</div>
+
+
+<div class="notes-overlay">
+    <button class="notes-close-btn">X</button>
+    <p>- Life</p>
+    <p>- Life</p>
+    <p>- Life</p>
+    <p>- Life</p>
+    <p>- Life</p>
+    <p>- Life</p>
+</div>
+
+<script>
+
+const terminalOverlay = document.getElementById("terminal-overlay");
+const terminalOutput = document.getElementById("terminal-output");
+const terminalInput = document.getElementById("terminal-input");
+
+const terminalFiles = {
+    "note.txt": "sunyi.",
+    "access.log": "[02:14] sunyi\n[02:41] hening.",
+    "dream.txt": "you are not supposed to be here."
+};
+
+const commands = {
+
+    help: () => `
+help       show commands
+ls         list files
+cat file   read file
+whoami     current user
+clear      clear terminal
+exit       close terminal
+`,
+
+    ls: () => Object.keys(terminalFiles).join("    "),
+
+    whoami: () => "guest@dream",
+
+    clear: () => {
+        terminalOutput.innerHTML = "";
+        return null;
+    },
+
+    exit: () => {
+        closeTerminal();
+        return null;
+    }
+};
+
+function print(text){
+    const div = document.createElement("div");
+    div.textContent = text;
+    terminalOutput.appendChild(div);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+}
+
+function runCommand(raw){
+
+    const input = raw.trim();
+
+    print(`> ${input}`);
+
+    let result;
+
+    if(input.startsWith("cat ")){
+
+        const file = input.slice(4).trim();
+
+        result =
+            terminalFiles[file] ||
+            `cat: ${file}: No such file`;
+
+    }
+    else if(commands[input]){
+
+        result = commands[input]();
+
+    }
+    else if(input === ""){
+
+        result = null;
+
+    }
+    else{
+
+        result = `command not found: ${input}`;
+
+    }
+
+    if(result){
+        print(result);
+    }
+}
+
+function submitInput(){
+
+    const value = terminalInput.value;
+
+    runCommand(value);
+
+    terminalInput.value = "";
+}
+
+function openTerminal(){
+
+    terminalOverlay.style.display = "flex";
+
+    terminalOutput.innerHTML = "";
+
+    print("connected...");
+    print("type 'help' for command list.");
+    print("");
+
+    terminalInput.focus();
+}
+
+function closeTerminal(){
+    terminalOverlay.style.display = "none";
+}
+
+document
+.getElementById("open-terminal")
+.addEventListener("click", openTerminal);
+
+document
+.getElementById("terminal-close")
+.addEventListener("click", closeTerminal);
+
+document
+.getElementById("terminal-send")
+.addEventListener("click", submitInput);
+
+
+
+const notesOverlay = document.querySelector('.notes-overlay')
+const notesCloseBtn = document.querySelector('.notes-close-btn')
+
+function openNotes(){
+    notesOverlay.style.display = "flex"
+}
+function closeNotes(){
+    notesOverlay.style.display = "none"
+
+}
+
+
+document.getElementById('open-notes')
+.addEventListener("click", openNotes)
+
+notesCloseBtn
+.addEventListener("click", closeNotes)
+
+terminalInput.addEventListener("keydown",(e)=>{
+    if(e.key === "Enter"){
+        submitInput();
+    }
+
+    if(e.key === "Escape"){
+        closeTerminal();
+    }
+});
+
+function updateClock(){
+
+    const now = new Date();
+
+    const h = String(now.getHours()).padStart(2,"0");
+    const m = String(now.getMinutes()).padStart(2,"0");
+
+    document.getElementById("clock").innerText =
+        `${h}:${m}`;
+}
+
+updateClock();
+setInterval(updateClock,1000);
+
+</script>
+
+</body>
+</html>
