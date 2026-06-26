@@ -1,5 +1,5 @@
 export const state = {
-    terminalOpen: false,
+    pcOpen: false,
     currentInteractTarget: null,
     cameraFocused: false,
 };

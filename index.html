@@ -27,17 +27,8 @@
     </div>
 
     <div id="interact-button">E</div>
-    <div id="terminal-overlay">
-        <div id="terminal-header">
-            <span>empty@dream</span>
-            <span id="terminal-close">[x] tutup</span>
-        </div>
-        <div id="terminal-output"></div>
-        <div id="terminal-input-line">
-            <span class="terminal-prompt">&gt;</span>
-            <input id="terminal-input" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" enterkeyhint="send" />
-            <button id="terminal-send" type="button">Ok</button>
-        </div>
+
+
     </div>
 
 
@@ -50,6 +41,97 @@
         </div>
     </div>
 
+
+    <!-- pc disini ngab -->
+
+    
+    <div class="pc-main">
+
+        <img class="wallpaper" src="./img/wallpaper.png" alt="">
+        <div class="vignette"></div>
+
+        <div class="desktop-icons">
+
+            <div class="desktop-app" id="open-terminal" tabindex="0">
+                <img src="./img/cat1.jpg" alt="">
+                <span>Terminal</span>
+            </div>
+
+            <div class="desktop-app" id="open-notes" tabindex="0">
+                <img src="./img/cat1.jpg" alt="">
+                <span>Notes</span>
+            </div>
+
+            <div class="desktop-app" id="open-chat" tabindex="0">
+                <img src="./img/cat1.jpg" alt="">
+                <span>Chat</span>
+            </div>
+
+        </div>
+
+        <div class="taskbar">
+            <button id="pc-back-btn">Sleep</button>
+            <div class="taskbar-left" id="taskbar-label"><b>dreamOS</b></div>
+            <div class="taskbar-right"><span id="clock"></span></div>
+        </div>
+
+    </div>
+
+
+    <div class="window" id="terminal-overlay">
+        <div class="window-titlebar" data-drag>
+            <span class="window-dot"></span>
+            <span class="window-title">guest@dream — terminal</span>
+            <button class="window-close" id="terminal-close">×</button>
+        </div>
+        <div class="window-body">
+            <div id="terminal-output"></div>
+            <div id="terminal-input-line">
+                <span class="prompt">&gt;</span>
+                <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" placeholder="type 'help' to begin">
+                <button id="terminal-send">run</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="window notes-window" id="notes-overlay">
+        <div class="window-titlebar" data-drag>
+            <span class="window-dot"></span>
+            <span class="window-title">notes.txt</span>
+            <button class="window-close" id="notes-close">×</button>
+        </div>
+        <div class="window-body notes-body">
+            <p>- Life</p>
+            <p>- Life</p>
+            <p>- Life</p>
+            <p>- Life</p>
+            <p>- Life</p>
+            <p>- Life</p>
+        </div>
+    </div>
+
+
+    <div class="window chat-window" id="chat-overlay">
+        <div class="window-titlebar" data-drag>
+            <span class="window-dot"></span>
+            <span class="window-title">chat — SidiMyOnlyFriends</span>
+            <button class="window-close" id="chat-close">×</button>
+        </div>
+        <div class="window-body chat-body">
+            <div class="chat-header">
+                <img src="./img/cat1.jpg" alt="">
+                <div>
+                    <p class="chat-name">SidiMyOnlyFriends</p>
+                    <p class="chat-status">online</p>
+                </div>
+            </div>
+            <div class="chat-thread">
+                <div class="bubble bubble-them">How r u?</div>
+                <div class="bubble bubble-them">Im so lonely rn</div>
+                <div class="bubble bubble-me">Keep it up G!</div>
+            </div>
+        </div>
 
 
 <script type="importmap">

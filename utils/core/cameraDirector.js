@@ -13,7 +13,7 @@ const endLookAt = new THREE.Vector3();
 const currentLookAt = new THREE.Vector3();
 
 // atur camera focus pas interaksi disini cuy, xyz
-const defaultOffset = new THREE.Vector3(1, 2, 2);
+const defaultOffset = new THREE.Vector3(1, 2, 1);
 
 function easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
